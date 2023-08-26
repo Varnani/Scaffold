@@ -12,7 +12,8 @@ namespace Scaffold
     struct Marker
     {
         std::string name;
-        float duration = 0;
+        float durationAsMilliseconds = 0;
+        float durationAsSeconds = 0;
 
         size_t measurementCount = 0;
 

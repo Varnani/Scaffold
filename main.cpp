@@ -6,13 +6,15 @@ int main(int, char**)
 
     manifest.title = "Scaffold";
     manifest.initialWidth = 1280;
-    manifest.initialHeight = 720;
+    manifest.initialHeight = 920;
 
     manifest.dockspaceOverViewport = true;
 
     manifest.useProfilerLayer = true;
     manifest.useInputInfoLayer = true;
     manifest.useDemoLayer = true;
+
+    manifest.swapInterval = 0;
 
     Scaffold::Application app(manifest);
     app.Run();

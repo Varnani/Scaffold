@@ -6,10 +6,12 @@ namespace Scaffold
 {
     struct Manifest
     {
-        std::string title;
+        std::string title = "Scaffold";
 
-        int initialWidth;
-        int initialHeight;
+        uint32_t initialWidth = 1280;
+        uint32_t initialHeight = 720;
+
+        uint8_t swapInterval = 1;
 
         float eventWaitTimeout = -1;
 

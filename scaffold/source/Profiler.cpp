@@ -73,7 +73,7 @@ std::string Profiler::GenerateReport()
 		}
 
 		std::stringstream formattedMarkerLabel;
-		formattedMarkerLabel << "- " << marker->name << " | " << std::fixed << std::setprecision(4) << marker->duration << "ms\n";
+		formattedMarkerLabel << "- " << marker->name << " | " << std::fixed << std::setprecision(4) << marker->durationAsMilliseconds << "ms\n";
 
 		std::string spaces(indentLevel * 2, ' ');
 		std::string formattedString = formattedMarkerLabel.str();

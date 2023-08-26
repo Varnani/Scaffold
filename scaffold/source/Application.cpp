@@ -47,7 +47,7 @@ Scaffold::Application::Application(const Manifest manifest)
     }
 
     glfwMakeContextCurrent(m_glfwWindow);
-    glfwSwapInterval(0);
+    glfwSwapInterval(m_manifest.swapInterval);
 
     // -- GLAD
     if (gladLoadGL(glfwGetProcAddress) == 0)
@@ -108,7 +108,7 @@ void Scaffold::Application::Run()
 
     while (!glfwWindowShouldClose(m_glfwWindow))
     {
-        float deltaTime = profiler.GetRootMarker().duration / 1000.0f;
+        float deltaTime = profiler.GetRootMarker().durationAsSeconds;
 
         profiler.BeginFrame();
 

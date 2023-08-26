@@ -28,6 +28,11 @@ void ProfilerLayer::OnRenderUI(float deltaTime)
 		ImGui::Separator();
 		ImGui::Spacing();
 
+		Scaffold::Marker& rootMarker = Scaffold::Application::GetProfiler().GetRootMarker();
+		float fps = 1.0f / rootMarker.durationAsSeconds;
+
+		ImGui::Text("%.2f FPS", fps);
+
 		if (selection == 0)
 		{
 			DrawAsTable();
@@ -128,12 +133,12 @@ void DrawMarkerDuration(Scaffold::Marker* marker)
 {
 	if (marker->measurementCount > 1)
 	{
-		ImGui::TextDisabled("%.5fms (count: %i)", marker->duration, (int)marker->measurementCount);
+		ImGui::TextDisabled("%.5fms (count: %i)", marker->durationAsMilliseconds, (int)marker->measurementCount);
 	}
 
 	else
 	{
-		ImGui::TextDisabled("%.4fms", marker->duration);
+		ImGui::TextDisabled("%.4fms", marker->durationAsMilliseconds);
 	}
 }
 
