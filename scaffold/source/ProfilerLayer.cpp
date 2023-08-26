@@ -46,7 +46,7 @@ void ProfilerLayer::OnRenderUI(float deltaTime)
 
 void DrawAsText()
 {
-	std::string report = Scaffold::Profiler::GetInstance().GenerateReport();
+	std::string report = Scaffold::Application::GetProfiler().GenerateReport();
 	ImGui::TextUnformatted(report.c_str());
 }
 
@@ -72,7 +72,7 @@ void DrawAsTable()
 
 void DrawMarkerTreeView()
 {
-	Scaffold::Marker& rootMarker = Scaffold::Profiler::GetInstance().GetRootMarker();
+	Scaffold::Marker& rootMarker = Scaffold::Application::GetProfiler().GetRootMarker();
 
 	if (rootMarker.subMarkers.size() == 0) return;
 

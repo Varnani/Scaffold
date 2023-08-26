@@ -3,11 +3,17 @@
 #include <imgui_impl_opengl3.h>
 
 #include <Application.hpp>
-#include <ProfilerLayer.hpp>
 #include <Profiler.hpp>
+#include <Input.hpp>
+
+#include <ProfilerLayer.hpp>
+#include <InputInfoLayer.hpp>
+#include <DemoLayer.hpp>
 
 #include <iostream>
 #include <type_traits>
+
+static Scaffold::Application* s_instance = nullptr;
 
 static void glfwErrorCallback(int error, const char* description)
 {
@@ -50,25 +56,41 @@ Scaffold::Application::Application(const Manifest manifest)
         return;
     }
 
+    // -- Modules
+    m_profiler = std::make_shared<Profiler>();
+    m_input = std::make_shared<Input>(m_glfwWindow);
+
     // -- IMGUI
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
 
     ImGui::StyleColorsDark();
 
     ImGui_ImplGlfw_InitForOpenGL(m_glfwWindow, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    m_initialized = true;
-
+    // -- Create Built-in Layers
     if (manifest.useProfilerLayer)
     {
         CreateLayer<ProfilerLayer>("Profiler");
     }
 
+    if (manifest.useInputInfoLayer)
+    {
+        CreateLayer<InputInfoLayer>("InputInfo");
+    }
+
+    if (manifest.useDemoLayer)
+    {
+        CreateLayer<DemoLayer>("ImGui Demo");
+    }
+
+    // -- Ready
+    s_instance = this;
+    m_initialized = true;
 };
 
 void Scaffold::Application::Run()
@@ -79,7 +101,10 @@ void Scaffold::Application::Run()
         return;
     }
 
-    Profiler& profiler = Scaffold::Profiler::GetInstance();
+    Profiler& profiler = GetProfiler();
+    Input& input = GetInput();
+
+    int width, height;
 
     while (!glfwWindowShouldClose(m_glfwWindow))
     {
@@ -88,64 +113,101 @@ void Scaffold::Application::Run()
         profiler.BeginFrame();
 
         profiler.BeginMarker("Poll Events");
-        glfwPollEvents();
+        {
+            input.UpdateKeyStates();
+
+            profiler.BeginMarker("GLFW Events");
+            {
+                if (m_manifest.eventWaitTimeout < 0.0f) glfwPollEvents();
+                else glfwWaitEventsTimeout(m_manifest.eventWaitTimeout);
+            }
+            profiler.EndMarker();
+        }
         profiler.EndMarker();
 
         profiler.BeginMarker("Adjust Viewport");
-        int width, height;
-        glfwGetFramebufferSize(m_glfwWindow, &width, &height);
-        glViewport(0, 0, width, height);
+        {
+            glfwGetFramebufferSize(m_glfwWindow, &width, &height);
+            glViewport(0, 0, width, height);
+        }
         profiler.EndMarker();
 
         profiler.BeginMarker("AppLayer::OnUpdate");
-        for (size_t i = 0; i < m_activeLayers.size(); i++)
         {
-            AppLayer* layer = m_activeLayers[i].get();
+            for (size_t i = 0; i < m_activeLayers.size(); i++)
+            {
+                AppLayer* layer = m_activeLayers[i].get();
 
-            profiler.BeginMarker(layer->name);
-            layer->OnUpdate(deltaTime);
-            profiler.EndMarker();
+                profiler.BeginMarker(layer->name);
+                layer->OnUpdate(deltaTime);
+                profiler.EndMarker();
+            }
         }
         profiler.EndMarker();
 
         profiler.BeginMarker("Prepare ImGui Frame");
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        if (m_manifest.dockspaceOverViewport)
         {
-            ImGui::DockSpaceOverViewport();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            if (m_manifest.dockspaceOverViewport)
+            {
+                ImGui::DockSpaceOverViewport();
+            }
         }
         profiler.EndMarker();
 
         profiler.BeginMarker("AppLayer::OnRenderUI");
-        for (size_t i = 0; i < m_activeLayers.size(); i++)
         {
-            AppLayer* layer = m_activeLayers[i].get();
+            for (size_t i = 0; i < m_activeLayers.size(); i++)
+            {
+                AppLayer* layer = m_activeLayers[i].get();
 
-            profiler.BeginMarker(layer->name);
-            layer->OnRenderUI(deltaTime);
-            profiler.EndMarker();
+                profiler.BeginMarker(layer->name);
+                layer->OnRenderUI(deltaTime);
+                profiler.EndMarker();
+            }
         }
         profiler.EndMarker();
 
         profiler.BeginMarker("Clear Buffer");
-        glClearColor(0, 0, 0, 1);
-        glClear(GL_COLOR_BUFFER_BIT);
+        {
+            glClearColor(0, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
         profiler.EndMarker();
 
         profiler.BeginMarker("ImGui Render");
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        {
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
         profiler.EndMarker();
 
         profiler.BeginMarker("Swap & Present");
-        glfwSwapBuffers(m_glfwWindow);
+        {
+            glfwSwapBuffers(m_glfwWindow);
+        }
         profiler.EndMarker();
 
         profiler.EndFrame();
     }
+}
+
+Scaffold::Input& Scaffold::Application::GetInput()
+{
+    return *s_instance->m_input;
+}
+
+Scaffold::Profiler& Scaffold::Application::GetProfiler()
+{
+    return *s_instance->m_profiler;
+}
+
+Scaffold::Application& Scaffold::Application::GetInstance()
+{
+    return *s_instance;
 }
 
 GLFWwindow* Scaffold::Application::GetWindowHandle()

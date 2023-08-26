@@ -1,2 +1,105 @@
-#include <KeyCodes.h>
+#include <Application.hpp>
+#include <Input.hpp>
+#include <Profiler.hpp>
 
+#include <iostream>
+
+using namespace Scaffold;
+
+static Input* s_instance = nullptr;
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void MouseCallback(GLFWwindow* window, int button, int action, int mods);
+
+Scaffold::Input::Input(GLFWwindow* window)
+{
+    glfwSetKeyCallback(window, KeyCallback);
+    glfwSetMouseButtonCallback(window, MouseCallback);
+
+    s_instance = this;
+}
+
+void Scaffold::Input::SetKeyState(KeyCode key, KeyState state)
+{
+    m_keyMap[key] = state;
+}
+
+void Scaffold::Input::SetMouseButtonState(MouseButton button, KeyState state)
+{
+    m_mouseMap[button] = state;
+}
+
+KeyState Scaffold::Input::GetKeyState(KeyCode code)
+{
+    return m_keyMap[code];
+}
+
+KeyState Scaffold::Input::GetMouseButtonState(MouseButton button)
+{
+    return m_mouseMap[button];
+}
+
+void Scaffold::Input::UpdateKeyStates()
+{
+    Application::GetProfiler().BeginMarker("Input::UpdateKeyStates");
+
+    //TODO convert to parallel for_each?
+
+    {
+        std::unordered_map<KeyCode, KeyState>::iterator iterator;
+        for (iterator = m_keyMap.begin(); iterator != m_keyMap.end(); ++iterator)
+        {
+            KeyState state = iterator->second;
+
+            if (state == KeyState::None || state == KeyState::Held) continue;
+
+            if (state == KeyState::Pressed) state = KeyState::Held;
+            if (state == KeyState::Released) state = KeyState::None;
+
+            m_keyMap[iterator->first] = state;
+        }
+    }
+
+    {
+        std::unordered_map<MouseButton, KeyState>::iterator iterator;
+        for (iterator = m_mouseMap.begin(); iterator != m_mouseMap.end(); ++iterator)
+        {
+            KeyState state = iterator->second;
+
+            if (state == KeyState::None || state == KeyState::Held) continue;
+
+            if (state == KeyState::Pressed) state = KeyState::Held;
+            if (state == KeyState::Released) state = KeyState::None;
+
+            m_mouseMap[iterator->first] = state;
+        }
+    }
+
+    Application::GetProfiler().EndMarker();
+}
+
+bool Scaffold::Input::IsKeyDown(KeyCode key)
+{
+    KeyState state = GetKeyState(key);
+    return state == KeyState::Pressed || state == KeyState::Held;
+}
+
+bool Scaffold::Input::IsMouseButtonDown(MouseButton button)
+{
+    KeyState state = GetMouseButtonState(button);
+    return state == KeyState::Pressed || state == KeyState::Held;
+}
+
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_REPEAT) return;
+    if (key == GLFW_KEY_UNKNOWN) return;
+
+    KeyState state = (KeyState)(action);
+    s_instance->SetKeyState((KeyCode)key, state);
+}
+
+void MouseCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    KeyState state = (KeyState)(action);
+    s_instance->SetMouseButtonState((MouseButton)button, state);
+}

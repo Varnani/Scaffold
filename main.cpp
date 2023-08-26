@@ -1,5 +1,4 @@
 #include <Application.hpp>
-#include <DemoLayer.hpp>
 
 int main(int, char**)
 {
@@ -8,8 +7,12 @@ int main(int, char**)
     manifest.title = "Scaffold";
     manifest.initialWidth = 1280;
     manifest.initialHeight = 720;
+
     manifest.dockspaceOverViewport = true;
+
     manifest.useProfilerLayer = true;
+    manifest.useInputInfoLayer = true;
+    manifest.useDemoLayer = true;
 
     Scaffold::Application app(manifest);
     app.Run();

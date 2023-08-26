@@ -7,12 +7,6 @@
 
 using namespace Scaffold;
 
-Profiler& Scaffold::Profiler::GetInstance()
-{
-	static Profiler s_profilerInstance;
-	return s_profilerInstance;
-}
-
 Profiler::Profiler()
 {
 	m_finishedRoot = Marker("Frame");

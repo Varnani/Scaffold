@@ -10,6 +10,8 @@ namespace Scaffold
 	class Profiler
 	{
 	public:
+		Profiler();
+
 		void BeginFrame();
 		void EndFrame();
 
@@ -19,15 +21,7 @@ namespace Scaffold
 		Marker& GetRootMarker();
 		std::string GenerateReport();
 
-	public:
-		static Profiler& GetInstance();
-
 	private:
-		Profiler();
-
-		Profiler(const Profiler&) = delete;
-		Profiler(Profiler&&) = delete;
-
 		Marker m_finishedRoot;
 		Marker m_activeRoot;
 
