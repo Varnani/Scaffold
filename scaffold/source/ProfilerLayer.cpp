@@ -10,10 +10,10 @@
 void DrawAsText();
 void DrawAsTable(); void DrawMarkerTreeView();
 
-void DrawMarkerStandalone(Scaffold::Marker* marker);
-void DrawMarkerDuration(Scaffold::Marker* marker);
+void DrawMarkerStandalone(Scaffold::Marker* marker, int durationIndentLevel);
+void DrawMarkerDuration(Scaffold::Marker* marker, int durationIndentLevel);
 
-bool BeginMarkerTree(Scaffold::Marker* marker);
+bool BeginMarkerTree(Scaffold::Marker* marker, int durationIndentLevel);
 void EndMarkerTree();
 
 void ProfilerLayer::OnRenderUI(float deltaTime)
@@ -50,7 +50,16 @@ void ProfilerLayer::OnRenderUI(float deltaTime)
 	ImGui::SeparatorText("MARKERS");
 
 	ImGui::RadioButton("As Table", &selection, 0); ImGui::SameLine();
-	ImGui::RadioButton("As Text", &selection, 1);
+	ImGui::RadioButton("As Text", &selection, 1); ImGui::SameLine();
+
+	static bool showOverhead = false;
+	ImGui::Checkbox("Show Marker Overhead", &showOverhead);
+
+	if (showOverhead)
+	{
+		Scaffold::Application::GetProfiler().BeginMarker("Marker Overhead");
+		Scaffold::Application::GetProfiler().EndMarker();
+	}
 
 	if (selection == 0) DrawAsTable();
 	else if (selection == 1) DrawAsText();
@@ -99,6 +108,8 @@ void DrawMarkerTreeView()
 	markerStack.push(&rootMarker);
 	treeStack.push(false);
 
+	int durationIndentLevel = 0;
+
 	while (!markerStack.empty())
 	{
 		Scaffold::Marker* marker = markerStack.top();
@@ -113,10 +124,12 @@ void DrawMarkerTreeView()
 
 			if (subMarkerCount > 0)
 			{
-				if (!BeginMarkerTree(marker))
+				if (!BeginMarkerTree(marker, durationIndentLevel))
 				{
 					continue;
 				};
+
+				durationIndentLevel++;
 
 				markerStack.push(marker);
 				treeStack.push(true);
@@ -130,35 +143,38 @@ void DrawMarkerTreeView()
 
 			else
 			{
-				DrawMarkerStandalone(marker);
+				DrawMarkerStandalone(marker, durationIndentLevel);
 			}
 		}
 
 		else
 		{
 			EndMarkerTree();
+			durationIndentLevel--;
 		}
 	}
 }
 
-void DrawMarkerDuration(Scaffold::Marker* marker)
+void DrawMarkerDuration(Scaffold::Marker* marker, int durationIndentLevel)
 {
+	std::string space(durationIndentLevel * 2, ' ');
+
 	if (marker->parentMarker != nullptr)
 	{
 		float duration = marker->durationAsMilliseconds;
 		float totalDuration = marker->parentMarker->durationAsMilliseconds;
 
 		float percent = (duration / totalDuration) * 100;
-		ImGui::TextDisabled("%.4fms (%% %.1f)", marker->durationAsMilliseconds, percent);
+		ImGui::TextDisabled("%s%.4fms (%% %.1f)", space.c_str(), marker->durationAsMilliseconds, percent);
 	}
 
 	else
 	{
-		ImGui::TextDisabled("%.4fms", marker->durationAsMilliseconds);
+		ImGui::TextDisabled("%s%.4fms", space.c_str(), marker->durationAsMilliseconds);
 	}
 }
 
-bool BeginMarkerTree(Scaffold::Marker* marker)
+bool BeginMarkerTree(Scaffold::Marker* marker, int durationIndentLevel)
 {
 	static ImGuiTreeNodeFlags flags =
 		ImGuiTreeNodeFlags_DefaultOpen |
@@ -171,7 +187,7 @@ bool BeginMarkerTree(Scaffold::Marker* marker)
 
 	ImGui::TableNextColumn();
 
-	DrawMarkerDuration(marker);
+	DrawMarkerDuration(marker, durationIndentLevel);
 
 	return isOpen;
 }
@@ -181,7 +197,7 @@ void EndMarkerTree()
 	ImGui::TreePop();
 }
 
-void DrawMarkerStandalone(Scaffold::Marker* marker)
+void DrawMarkerStandalone(Scaffold::Marker* marker, int durationIndentLevel)
 {
 	ImGui::Indent(20);
 
@@ -192,7 +208,7 @@ void DrawMarkerStandalone(Scaffold::Marker* marker)
 
 	ImGui::TableNextColumn();
 
-	DrawMarkerDuration(marker);
+	DrawMarkerDuration(marker, durationIndentLevel);
 
 	ImGui::Indent(-20);
 }
