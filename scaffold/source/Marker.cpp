@@ -47,6 +47,7 @@ void Scaffold::Marker::CompleteMeasurement()
 
 Scaffold::Marker* Scaffold::Marker::CreateSubMarker(std::string name)
 {
-    Marker* markerPtr = subMarkers.emplace_back(std::make_unique<Marker>(name)).get();
+    std::unique_ptr<Marker>& newMarker = subMarkers.emplace_back(std::make_unique<Marker>(name));
+    Marker* markerPtr = newMarker.get();
     return markerPtr;
 }
