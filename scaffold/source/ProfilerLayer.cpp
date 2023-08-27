@@ -7,13 +7,14 @@
 
 #include <stack>
 
-void DrawAsTable();
 void DrawAsText();
+void DrawAsTable(); void DrawMarkerTreeView();
 
-void DrawMarkerTreeView();
-bool BeginTree(Scaffold::Marker* marker);
-void DrawMarker(Scaffold::Marker* marker);
-void EndTree();
+void DrawMarkerStandalone(Scaffold::Marker* marker);
+void DrawMarkerDuration(Scaffold::Marker* marker);
+
+bool BeginMarkerTree(Scaffold::Marker* marker);
+void EndMarkerTree();
 
 void ProfilerLayer::OnRenderUI(float deltaTime)
 {
@@ -46,9 +47,7 @@ void ProfilerLayer::OnRenderUI(float deltaTime)
 	ImGui::Text("Frame timing: %.2f FPS (%.4fms)", 1.0f / deltaTime, deltaTime * 1000.0f);
 	ImGui::Text("1 sec window: %i FPS (%.4fms)", lastFrameCount, lastFrameTime * 1000.0f);
 
-	ImGui::Spacing();
-	ImGui::Separator();
-	ImGui::Spacing();
+	ImGui::SeparatorText("MARKERS");
 
 	ImGui::RadioButton("As Table", &selection, 0); ImGui::SameLine();
 	ImGui::RadioButton("As Text", &selection, 1);
@@ -95,6 +94,8 @@ void DrawMarkerTreeView()
 	std::stack<Scaffold::Marker*> markerStack;
 	std::stack<bool> treeStack;
 
+	Scaffold::Marker* rootMarkerPtr = &rootMarker;
+
 	markerStack.push(&rootMarker);
 	treeStack.push(false);
 
@@ -112,7 +113,7 @@ void DrawMarkerTreeView()
 
 			if (subMarkerCount > 0)
 			{
-				if (!BeginTree(marker))
+				if (!BeginMarkerTree(marker))
 				{
 					continue;
 				};
@@ -122,29 +123,33 @@ void DrawMarkerTreeView()
 
 				for (int i = subMarkerCount - 1; i > -1; i--)
 				{
-					markerStack.push(&marker->subMarkers[i]);
+					markerStack.push(marker->subMarkers[i].get());
 					treeStack.push(false);
 				}
 			}
 
 			else
 			{
-				DrawMarker(marker);
+				DrawMarkerStandalone(marker);
 			}
 		}
 
 		else
 		{
-			EndTree();
+			EndMarkerTree();
 		}
 	}
 }
 
 void DrawMarkerDuration(Scaffold::Marker* marker)
 {
-	if (marker->measurementCount > 1)
+	if (marker->parentMarker != nullptr)
 	{
-		ImGui::TextDisabled("%.5fms (count: %i)", marker->durationAsMilliseconds, (int)marker->measurementCount);
+		float duration = marker->durationAsMilliseconds;
+		float totalDuration = marker->parentMarker->durationAsMilliseconds;
+
+		float percent = (duration / totalDuration) * 100;
+		ImGui::TextDisabled("%.4fms (%% %.1f)", marker->durationAsMilliseconds, percent);
 	}
 
 	else
@@ -153,34 +158,38 @@ void DrawMarkerDuration(Scaffold::Marker* marker)
 	}
 }
 
-bool BeginTree(Scaffold::Marker* marker)
+bool BeginMarkerTree(Scaffold::Marker* marker)
 {
 	static ImGuiTreeNodeFlags flags =
 		ImGuiTreeNodeFlags_DefaultOpen |
 		ImGuiTreeNodeFlags_SpanFullWidth;
 
 	ImGui::TableNextRow();
-
 	ImGui::TableNextColumn();
+
 	bool isOpen = ImGui::TreeNodeEx(marker->name.c_str(), flags);
 
 	ImGui::TableNextColumn();
+
 	DrawMarkerDuration(marker);
+
 	return isOpen;
 }
 
-void EndTree()
+void EndMarkerTree()
 {
 	ImGui::TreePop();
 }
 
-void DrawMarker(Scaffold::Marker* marker)
+void DrawMarkerStandalone(Scaffold::Marker* marker)
 {
 	ImGui::Indent(20);
 
 	ImGui::TableNextRow();
 	ImGui::TableNextColumn();
+
 	ImGui::TextDisabled("%s", marker->name.c_str());
+
 	ImGui::TableNextColumn();
 
 	DrawMarkerDuration(marker);

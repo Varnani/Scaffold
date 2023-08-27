@@ -3,6 +3,9 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <memory>
+
+#include <iostream>
 
 namespace Scaffold
 {
@@ -11,7 +14,7 @@ namespace Scaffold
 
     struct Marker
     {
-        std::string name;
+        std::string name = "Unnamed";
         float durationAsMilliseconds = 0;
         float durationAsSeconds = 0;
 
@@ -20,13 +23,15 @@ namespace Scaffold
         TimePoint start;
         TimePoint end;
 
-        std::vector<Marker> subMarkers;
+        std::vector<std::unique_ptr<Marker>> subMarkers;
         Marker* parentMarker = nullptr;
 
-        Marker(const std::string name);
         Marker();
+        Marker(const std::string name);
 
         void StartMeasurement();
         void CompleteMeasurement();
+
+        Marker* CreateSubMarker(std::string name);
     };
 } // namespace Scaffold

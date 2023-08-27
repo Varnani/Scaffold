@@ -39,11 +39,7 @@ void InputInfoLayer::OnRenderUI(float deltaTime)
 
     ImGui::Text("Mouse position | x: %.2f, y: %.2f", mousePos.x, mousePos.y);
 
-    ImGui::Spacing();
-    ImGui::Separator();
-    ImGui::Spacing();
-
-    ImGui::TextUnformatted("Key State Map:");
+    ImGui::SeparatorText("STATE MAPS");
 
     auto keyMap = input.GetKeyStateMap();
     auto mouseButtonMap = input.GetMouseButtonStateMap();

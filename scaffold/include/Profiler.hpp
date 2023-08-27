@@ -10,8 +10,6 @@ namespace Scaffold
 	class Profiler
 	{
 	public:
-		Profiler();
-
 		void BeginFrame();
 		void EndFrame();
 

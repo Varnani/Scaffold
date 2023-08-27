@@ -7,11 +7,6 @@
 
 using namespace Scaffold;
 
-Profiler::Profiler()
-{
-	m_finishedRoot = Marker("Frame");
-}
-
 void Profiler::BeginFrame()
 {
 	m_activeRoot = Marker("Frame");
@@ -21,14 +16,17 @@ void Profiler::BeginFrame()
 void Profiler::EndFrame()
 {
 	EndMarker();
-	m_finishedRoot = m_activeRoot;
+	m_finishedRoot = std::move(m_activeRoot);
+
+	for (auto&& marker : m_finishedRoot.subMarkers)
+	{
+		marker.get()->parentMarker = &m_finishedRoot;
+	}
 }
 
 void Profiler::BeginMarker(const std::string name)
 {
-	m_activeMarker->subMarkers.emplace_back(name);
-
-	Marker* marker = &m_activeMarker->subMarkers.back();
+	Marker* marker = m_activeMarker->CreateSubMarker(name);
 	marker->parentMarker = m_activeMarker;
 	m_activeMarker = marker;
 }
@@ -73,7 +71,17 @@ std::string Profiler::GenerateReport()
 		}
 
 		std::stringstream formattedMarkerLabel;
-		formattedMarkerLabel << "- " << marker->name << " | " << std::fixed << std::setprecision(4) << marker->durationAsMilliseconds << "ms\n";
+
+		formattedMarkerLabel << "- " << marker->name << " | " <<
+			std::fixed << std::setprecision(4) << marker->durationAsMilliseconds << "ms";
+
+		if (marker->parentMarker != nullptr)
+		{
+			float percent = (marker->durationAsMilliseconds / marker->parentMarker->durationAsMilliseconds) * 100;
+			formattedMarkerLabel << " (% " << std::fixed << std::setprecision(1) << percent << (")");
+		}
+
+		formattedMarkerLabel << "\n";
 
 		std::string spaces(indentLevel * 2, ' ');
 		std::string formattedString = formattedMarkerLabel.str();
@@ -90,7 +98,7 @@ std::string Profiler::GenerateReport()
 
 			for (int i = subMarkerCount - 1; i > -1; i--)
 			{
-				markerStack.push(&marker->subMarkers[i]);
+				markerStack.push(marker->subMarkers[i].get());
 				visitStack.push(false);
 			}
 

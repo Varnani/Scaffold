@@ -18,16 +18,11 @@ float GetElapsed(Scaffold::TimePoint start, Scaffold::TimePoint end)
 Scaffold::Marker::Marker(const std::string name)
 {
     this->name = name;
-    durationAsMilliseconds = 0;
-
     StartMeasurement();
 }
 
 Scaffold::Marker::Marker()
 {
-    this->name = "Unnamed";
-    durationAsMilliseconds = 0;
-
     StartMeasurement();
 }
 
@@ -48,4 +43,10 @@ void Scaffold::Marker::CompleteMeasurement()
     {
         durationAsMilliseconds *= 0.5f;
     }
+}
+
+Scaffold::Marker* Scaffold::Marker::CreateSubMarker(std::string name)
+{
+    Marker* markerPtr = subMarkers.emplace_back(std::make_unique<Marker>(name)).get();
+    return markerPtr;
 }
