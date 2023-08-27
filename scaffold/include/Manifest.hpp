@@ -16,8 +16,9 @@ namespace Scaffold
         float eventWaitTimeout = -1.0f;
 
         bool dockspaceOverViewport = false;
+
         bool useProfilerLayer = false;
         bool useInputInfoLayer = false;
-        bool useDemoLayer = false;
+        bool useDemoLayer = true;
     };
 } // namespace Scaffold
