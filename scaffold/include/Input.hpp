@@ -13,7 +13,9 @@ namespace Scaffold
     {
     public:
         Input(GLFWwindow* window);
+        ~Input() = default;
 
+    public:
         void SetKeyState(KeyCode key, KeyState state);
         void SetMouseButtonState(MouseButton button, KeyState state);
 
@@ -34,6 +36,7 @@ namespace Scaffold
 
     private:
         GLFWwindow* m_windowHandle = nullptr;
+
         CursorMode m_cursorMode = CursorMode::Normal;
 
         std::unordered_map<KeyCode, KeyState> m_keyMap;

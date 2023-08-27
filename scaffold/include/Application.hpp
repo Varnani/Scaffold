@@ -17,12 +17,10 @@ namespace Scaffold
   {
   public:
     Application(const Manifest manifest);
-
-    void Run();
-
     ~Application();
 
   public:
+    void Run();
     GLFWwindow* GetWindowHandle();
 
   public:
@@ -37,11 +35,13 @@ namespace Scaffold
       static_assert(std::is_base_of<AppLayer, T>::value,
         "You can only create AppLayer objects!");
 
-      AppLayer* layer = m_activeLayers.emplace_back(std::make_shared<T>()).get();
-      layer->name = name;
+      std::shared_ptr<AppLayer> layer = std::make_shared<T>();
+      layer.get()->name = name;
 
-      T* child = dynamic_cast<T*>(layer);
-      return *child;
+      m_activeLayers.push_back(layer);
+
+      T* layerPtr = dynamic_cast<T*>(layer.get());
+      return *layerPtr;
     }
 
   private:
@@ -49,8 +49,8 @@ namespace Scaffold
 
     Manifest m_manifest;
 
-    std::shared_ptr<Profiler> m_profiler;
-    std::shared_ptr<Input> m_input;
+    std::unique_ptr<Profiler> m_profiler;
+    std::unique_ptr<Input> m_input;
 
     GLFWwindow* m_glfwWindow;
 

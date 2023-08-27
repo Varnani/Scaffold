@@ -53,32 +53,30 @@ void Scaffold::Input::UpdateKeyStates()
     //TODO convert to parallel for_each?
 
     {
-        std::unordered_map<KeyCode, KeyState>::iterator iterator;
-        for (iterator = m_keyMap.begin(); iterator != m_keyMap.end(); ++iterator)
+        for (auto&& pair : m_keyMap)
         {
-            KeyState state = iterator->second;
+            KeyState state = pair.second;
 
             if (state == KeyState::None || state == KeyState::Held) continue;
 
             if (state == KeyState::Pressed) state = KeyState::Held;
             if (state == KeyState::Released) state = KeyState::None;
 
-            m_keyMap[iterator->first] = state;
+            m_keyMap[pair.first] = state;
         }
     }
 
     {
-        std::unordered_map<MouseButton, KeyState>::iterator iterator;
-        for (iterator = m_mouseMap.begin(); iterator != m_mouseMap.end(); ++iterator)
+        for (auto&& pair : m_mouseMap)
         {
-            KeyState state = iterator->second;
+            KeyState state = pair.second;
 
             if (state == KeyState::None || state == KeyState::Held) continue;
 
             if (state == KeyState::Pressed) state = KeyState::Held;
             if (state == KeyState::Released) state = KeyState::None;
 
-            m_mouseMap[iterator->first] = state;
+            m_mouseMap[pair.first] = state;
         }
     }
 

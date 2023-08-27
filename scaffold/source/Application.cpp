@@ -57,8 +57,8 @@ Scaffold::Application::Application(const Manifest manifest)
     }
 
     // -- Modules
-    m_profiler = std::make_shared<Profiler>();
-    m_input = std::make_shared<Input>(m_glfwWindow);
+    m_profiler = std::make_unique<Profiler>();
+    m_input = std::make_unique<Input>(m_glfwWindow);
 
     // -- IMGUI
     IMGUI_CHECKVERSION();
@@ -218,6 +218,9 @@ GLFWwindow* Scaffold::Application::GetWindowHandle()
 Scaffold::Application::~Application()
 {
     if (!m_initialized) return;
+
+    m_profiler.reset();
+    m_input.reset();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
