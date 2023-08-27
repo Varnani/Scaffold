@@ -75,12 +75,12 @@ Scaffold::Application::Application(const Manifest manifest)
     // -- Create Built-in Layers
     if (manifest.useProfilerLayer)
     {
-        CreateLayer<ProfilerLayer>("Profiler");
+        CreateLayer<ProfilerLayer>("Profiler UI");
     }
 
     if (manifest.useInputInfoLayer)
     {
-        CreateLayer<InputInfoLayer>("InputInfo");
+        CreateLayer<InputInfoLayer>("InputInfo UI");
     }
 
     if (manifest.useDemoLayer)

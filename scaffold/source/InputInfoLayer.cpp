@@ -37,7 +37,7 @@ void InputInfoLayer::OnRenderUI(float deltaTime)
     Scaffold::Input& input = Scaffold::Application::GetInstance().GetInput();
     glm::vec2 mousePos = input.GetMousePosition();
 
-    ImGui::Text("Mouse position: x - %.2f, y - %.2f", mousePos.x, mousePos.y);
+    ImGui::Text("Mouse position | x: %.2f, y: %.2f", mousePos.x, mousePos.y);
 
     ImGui::Spacing();
     ImGui::Separator();
