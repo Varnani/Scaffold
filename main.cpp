@@ -14,7 +14,7 @@ int main(int, char**)
     manifest.useInputInfoLayer = true;
     manifest.useDemoLayer = true;
 
-    manifest.swapInterval = 0;
+    manifest.swapInterval = 1;
 
     Scaffold::Application app(manifest);
     app.Run();

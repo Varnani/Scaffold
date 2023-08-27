@@ -1,33 +1,71 @@
 #include <imgui.h>
+#include <glm/glm.hpp>
 
+#include <Application.hpp>
 #include <InputInfoLayer.hpp>
+#include <Input.hpp>
+#include <KeyCodes.h>
+
+std::string StateToString(Scaffold::KeyState state)
+{
+    std::string stateName;
+
+    switch (state)
+    {
+    case Scaffold::KeyState::Held:
+        stateName = "Held";
+        break;
+    case Scaffold::KeyState::Pressed:
+        stateName = "Pressed";
+        break;
+    case Scaffold::KeyState::Released:
+        stateName = "Released";
+        break;
+    case Scaffold::KeyState::None:
+        stateName = "None";
+        break;
+    }
+
+    return stateName;
+}
 
 void InputInfoLayer::OnRenderUI(float deltaTime)
 {
-    ImGui::Begin("Input Info");
+    bool show = ImGui::Begin("Input Info");
+    if (!show) { ImGui::End(); return; }
 
-    ImGui::TextUnformatted("Mouse position:");
-    ImGui::TextUnformatted("Last mouse key:");
+    Scaffold::Input& input = Scaffold::Application::GetInstance().GetInput();
+    glm::vec2 mousePos = input.GetMousePosition();
+
+    ImGui::Text("Mouse position: x - %.2f, y - %.2f", mousePos.x, mousePos.y);
 
     ImGui::Spacing();
     ImGui::Separator();
     ImGui::Spacing();
 
-    ImGui::TextUnformatted("Last Key Events:");
+    ImGui::TextUnformatted("Key State Map:");
 
-    static int selectionIndex = 0;
+    auto keyMap = input.GetKeyStateMap();
+    auto mouseButtonMap = input.GetMouseButtonStateMap();
 
     if (ImGui::BeginListBox("key log box", ImVec2(-FLT_MIN, ImGui::GetContentRegionAvail().y)))
     {
-        for (size_t i = 0; i < m_keyLog.size(); i++)
+        for (auto&& pair : keyMap)
         {
-            std::string& log = m_keyLog[i];
+            Scaffold::KeyCode key = pair.first;
+            Scaffold::KeyState state = pair.second;
 
-            const bool isSelected = (selectionIndex == i);
-
-            if (ImGui::Selectable(log.c_str(), isSelected)) selectionIndex = i;
-            if (isSelected) ImGui::SetItemDefaultFocus();
+            ImGui::Text("KeyCode: %i, KeyState: %s", (int)key, StateToString(state).c_str());
         }
+
+        for (auto&& pair : mouseButtonMap)
+        {
+            Scaffold::MouseButton key = pair.first;
+            Scaffold::KeyState state = pair.second;
+
+            ImGui::Text("MouseButton: %i, KeyState: %s", (int)key, StateToString(state).c_str());
+        }
+
         ImGui::EndListBox();
     }
 

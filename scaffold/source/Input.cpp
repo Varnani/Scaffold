@@ -15,6 +15,7 @@ Scaffold::Input::Input(GLFWwindow* window)
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetMouseButtonCallback(window, MouseCallback);
 
+    m_windowHandle = window;
     s_instance = this;
 }
 
@@ -36,6 +37,13 @@ KeyState Scaffold::Input::GetKeyState(KeyCode code)
 KeyState Scaffold::Input::GetMouseButtonState(MouseButton button)
 {
     return m_mouseMap[button];
+}
+
+glm::vec2 Scaffold::Input::GetMousePosition()
+{
+    double xpos, ypos;
+    glfwGetCursorPos(m_windowHandle, &xpos, &ypos);
+    return glm::vec2() = { xpos, ypos };
 }
 
 void Scaffold::Input::UpdateKeyStates()
@@ -87,6 +95,24 @@ bool Scaffold::Input::IsMouseButtonDown(MouseButton button)
 {
     KeyState state = GetMouseButtonState(button);
     return state == KeyState::Pressed || state == KeyState::Held;
+}
+
+void Scaffold::Input::SetCursorMode(CursorMode mode)
+{
+    if (mode == m_cursorMode) return;
+    m_cursorMode = mode;
+
+    glfwSetInputMode(m_windowHandle, GLFW_CURSOR, (int)mode);
+}
+
+std::unordered_map<KeyCode, KeyState>& Scaffold::Input::GetKeyStateMap()
+{
+    return m_keyMap;
+}
+
+std::unordered_map<MouseButton, KeyState>& Scaffold::Input::GetMouseButtonStateMap()
+{
+    return m_mouseMap;
 }
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

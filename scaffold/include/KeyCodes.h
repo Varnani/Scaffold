@@ -149,11 +149,12 @@ namespace Scaffold
         Held = 2
     };
 
+    // glfw.h -- GLFW_CURSOR_***
     enum class CursorMode
     {
-        Normal = 0,
-        Hidden = 1,
-        Locked = 2
+        Normal = 0x00034001,
+        Hidden = 0x00034002,
+        Locked = 0x00034003
     };
 
     typedef enum class MouseButton : uint16_t

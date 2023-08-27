@@ -25,6 +25,7 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/vendor/glfw-3.3.8/include/GLFW
     ${CMAKE_SOURCE_DIR}/vendor/glad/include
     ${CMAKE_SOURCE_DIR}/vendor/imgui
+    ${CMAKE_SOURCE_DIR}/vendor/glm/
 )
 
 # glfw
