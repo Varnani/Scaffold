@@ -7,12 +7,18 @@
 #include <memory>
 
 #include <Manifest.hpp>
-#include <AppLayer.hpp>
 #include <Input.hpp>
 #include <Profiler.hpp>
 
+#include <interface/IUpdate.hpp>
+#include <interface/IRenderUI.hpp>
+
 namespace Scaffold
 {
+  template <typename Derived>
+  concept AppObjectConcept = std::derived_from<Derived, IUpdate> ||
+    std::derived_from<Derived, IRenderUI>;
+
   class Application
   {
   public:
@@ -29,19 +35,25 @@ namespace Scaffold
     static Application& GetInstance();
 
   public:
-    template <typename T>
-    T& CreateLayer(std::string name)
+    template<AppObjectConcept Object>
+    Object& CreateObject(std::string name)
     {
-      static_assert(std::is_base_of<AppLayer, T>::value,
-        "You can only create AppLayer objects!");
+      std::shared_ptr<Object> object = std::make_shared<Object>();
+      object.get()->name = name;
 
-      std::shared_ptr<AppLayer> layer = std::make_shared<T>();
-      layer.get()->name = name;
+      if constexpr (std::is_base_of_v<IUpdate, Object>)
+      {
+        std::shared_ptr<IUpdate> updateObject(object);
+        m_updateObjects.push_back(updateObject);
+      }
 
-      m_activeLayers.push_back(layer);
+      if constexpr (std::is_base_of_v<IRenderUI, Object>)
+      {
+        std::shared_ptr<IRenderUI> uiObject(object);
+        m_uiObjects.push_back(uiObject);
+      }
 
-      T* layerPtr = dynamic_cast<T*>(layer.get());
-      return *layerPtr;
+      return *object.get();
     }
 
   private:
@@ -54,7 +66,8 @@ namespace Scaffold
 
     GLFWwindow* m_glfwWindow;
 
-    std::vector<std::shared_ptr<AppLayer>> m_activeLayers;
+    std::vector<std::shared_ptr<IUpdate>> m_updateObjects;
+    std::vector<std::shared_ptr<IRenderUI>> m_uiObjects;
 
     Application(const Application&) = delete;
     Application(Application&&) = delete;

@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 
 #include <Application.hpp>
-#include <InputInfoLayer.hpp>
+#include "InputInfoLayer.hpp"
 #include <Input.hpp>
 #include <KeyCodes.h>
 

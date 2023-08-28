@@ -6,9 +6,9 @@
 #include <Profiler.hpp>
 #include <Input.hpp>
 
-#include <ProfilerLayer.hpp>
-#include <InputInfoLayer.hpp>
-#include <DemoLayer.hpp>
+#include "../builtin/DemoLayer.hpp"
+#include "../builtin/InputInfoLayer.hpp"
+#include "../builtin/ProfilerLayer.hpp"
 
 #include <iostream>
 #include <type_traits>
@@ -75,17 +75,17 @@ Scaffold::Application::Application(const Manifest manifest)
     // -- Create Built-in Layers
     if (manifest.useProfilerLayer)
     {
-        CreateLayer<ProfilerLayer>("Profiler UI");
+        CreateObject<ProfilerLayer>("Profiler UI");
     }
 
     if (manifest.useInputInfoLayer)
     {
-        CreateLayer<InputInfoLayer>("InputInfo UI");
+        CreateObject<InputInfoLayer>("InputInfo UI");
     }
 
     if (manifest.useDemoLayer)
     {
-        CreateLayer<DemoLayer>("ImGui Demo");
+        CreateObject<DemoLayer>("ImGui Demo");
     }
 
     // -- Ready
@@ -132,14 +132,14 @@ void Scaffold::Application::Run()
         }
         profiler.EndMarker();
 
-        profiler.BeginMarker("AppLayer::OnUpdate");
+        profiler.BeginMarker("IUpdate::OnUpdate");
         {
-            for (size_t i = 0; i < m_activeLayers.size(); i++)
+            for (size_t i = 0; i < m_updateObjects.size(); i++)
             {
-                AppLayer* layer = m_activeLayers[i].get();
+                IUpdate* object = m_updateObjects[i].get();
 
-                profiler.BeginMarker(layer->name);
-                layer->OnUpdate(deltaTime);
+                profiler.BeginMarker(object->name);
+                object->OnUpdate(deltaTime);
                 profiler.EndMarker();
             }
         }
@@ -158,20 +158,20 @@ void Scaffold::Application::Run()
         }
         profiler.EndMarker();
 
-        profiler.BeginMarker("AppLayer::OnRenderUI");
+        profiler.BeginMarker("IRenderUI::OnRenderUI");
         {
-            for (size_t i = 0; i < m_activeLayers.size(); i++)
+            for (size_t i = 0; i < m_uiObjects.size(); i++)
             {
-                AppLayer* layer = m_activeLayers[i].get();
+                IRenderUI* object = m_uiObjects[i].get();
 
-                profiler.BeginMarker(layer->name);
-                layer->OnRenderUI(deltaTime);
+                profiler.BeginMarker(object->name);
+                object->OnRenderUI(deltaTime);
                 profiler.EndMarker();
             }
         }
         profiler.EndMarker();
 
-        profiler.BeginMarker("Clear Buffer");
+        profiler.BeginMarker("Clear Framebuffer");
         {
             glClearColor(0, 0, 0, 1);
             glClear(GL_COLOR_BUFFER_BIT);

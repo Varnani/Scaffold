@@ -8,6 +8,7 @@ file(
     GLOB 
     scaffold_sources 
     ${CMAKE_SOURCE_DIR}/scaffold/source/*.cpp
+    ${CMAKE_SOURCE_DIR}/scaffold/builtin/*.cpp
     ${CMAKE_SOURCE_DIR}/vendor/imgui/*.cpp
 )
 
@@ -25,7 +26,7 @@ target_include_directories(
     ${CMAKE_SOURCE_DIR}/vendor/glfw-3.3.8/include/GLFW
     ${CMAKE_SOURCE_DIR}/vendor/glad/include
     ${CMAKE_SOURCE_DIR}/vendor/imgui
-    ${CMAKE_SOURCE_DIR}/vendor/glm/
+    ${CMAKE_SOURCE_DIR}/vendor/glm
 )
 
 # glfw

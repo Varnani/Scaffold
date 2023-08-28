@@ -17,6 +17,7 @@ int main(int, char**)
     manifest.swapInterval = 0;
 
     Scaffold::Application app(manifest);
+
     app.Run();
 
     return 0;
