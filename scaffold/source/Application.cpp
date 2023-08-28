@@ -34,7 +34,6 @@ Scaffold::Application::Application(const Manifest manifest)
         return;
     }
 
-    const char* glsl_version = "#version 330";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -69,6 +68,7 @@ Scaffold::Application::Application(const Manifest manifest)
 
     ImGui::StyleColorsDark();
 
+    const char* glsl_version = "#version 330";
     ImGui_ImplGlfw_InitForOpenGL(m_glfwWindow, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
