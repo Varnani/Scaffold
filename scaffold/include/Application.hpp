@@ -16,7 +16,8 @@
 namespace Scaffold
 {
   template <typename Derived>
-  concept AppObjectConcept = std::derived_from<Derived, IUpdate> ||
+  concept AppObjectConcept =
+    std::derived_from<Derived, IUpdate> ||
     std::derived_from<Derived, IRenderUI>;
 
   class Application
