@@ -103,8 +103,6 @@ void DrawMarkerTreeView()
 	std::stack<Scaffold::Marker*> markerStack;
 	std::stack<bool> treeStack;
 
-	Scaffold::Marker* rootMarkerPtr = &rootMarker;
-
 	markerStack.push(&rootMarker);
 	treeStack.push(false);
 
