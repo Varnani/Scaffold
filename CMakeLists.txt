@@ -40,7 +40,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
 
 # - project includes
 #target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC
-#    ${CMAKE_SOURCE_DIRpath/to/includess
+#    ${CMAKE_SOURCE_DIR}path/to/includes
 #)
 
 # vendor specific
