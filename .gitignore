@@ -34,8 +34,36 @@
 # VSCode
 .vscode/
 
+# Visual Studio
+.vs/
+
 # Build folder
 build/
+bin/
+
+# Cache
+.cache/
 
 # ImGui
 imgui.ini
+
+#glfw
+glfw3.pc
+glfw_config.h
+glfw3Config.cmake
+glfw3ConfigVersion.cmake
+
+# CMake generated
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+cmake_uninstall.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
